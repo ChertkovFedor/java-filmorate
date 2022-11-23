@@ -1,26 +1,35 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
-@Getter
 @RestController
 public class FilmController {
 
-    private Map<Integer, Film> films = new HashMap<>();
+    private List<Film> films = new ArrayList<>();
     int newId = 1;
 
-    @GetMapping("/films")
-    public Map<Integer, Film> findAll() {
+    @GetMapping(value = "/films")
+    public List<Film> findAll() {
         return films;
+    }
+
+    @GetMapping(value = "/films/{id}")
+    public Film find(@PathVariable("id") int id) {
+        for (Film film:films) {
+            if (film.getId() == id) {
+                return film;
+            }
+        }
+        Validator.notFoundId();
+        return null;
     }
 
     @PostMapping(value = "/films", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -44,25 +53,37 @@ public class FilmController {
 
     @DeleteMapping(value = "/films/{id}")
     public void delete(@PathVariable("id") int id) {
-        films.remove(id);
-        log.info("Фильм удален");
+        for (Film film:films) {
+            if (film.getId() == id) {
+                films.remove(film);
+                log.info("Фильм удален");
+                return;
+            }
+        }
+        Validator.notFoundId();
     }
 
     public void addFilm(Film film) {
         Validator.filmValid(film);
         if (film.getId() == 0) {
             film.setId(newId++);
-        } else if (newId < film.getId()) {
+        } else if (newId <= film.getId()) {
             newId = film.getId() + 1;
         }
-        films.put(film.getId(), film);
+        films.add(film);
         log.info("Фильм добавлен");
     }
 
     public void updateFilm(int id, Film film) {
         Validator.filmValid(film);
-        films.get(id).setFilm(film);
-        log.info("Фильм обновлен");
+        for (Film oldFilm:films) {
+            if (oldFilm.getId() == id) {
+                oldFilm.setFilm(film);
+                log.info("Фильм обновлен");
+                return;
+            }
+        }
+        Validator.notFoundId();
     }
 
 }

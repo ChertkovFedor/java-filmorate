@@ -30,10 +30,10 @@ public class controllerTest {
         filmController.create(film1);
         filmController.create(film2);
 
-        assertTrue(filmController.getFilms().containsKey(1));
-        assertTrue(filmController.getFilms().containsKey(2));
-        assertEquals(filmController.getFilms().get(1), film1);
-        assertEquals(filmController.getFilms().get(2), film2);
+        assertTrue(filmController.findAll().contains(film1));
+        assertTrue(filmController.findAll().contains(film2));
+        assertEquals(filmController.find(1), film1);
+        assertEquals(filmController.find(2), film2);
     }
 
     @Test
@@ -43,10 +43,10 @@ public class controllerTest {
         userController.create(user1);
         userController.create(user2);
 
-        assertTrue(userController.getUsers().containsKey(1));
-        assertTrue(userController.getUsers().containsKey(2));
-        assertEquals(userController.getUsers().get(1), user1);
-        assertEquals(userController.getUsers().get(2), user2);
+        assertTrue(userController.findAll().contains(user1));
+        assertTrue(userController.findAll().contains(user2));
+        assertEquals(userController.find(1), user1);
+        assertEquals(userController.find(2), user2);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class controllerTest {
         Film newFilm = getNewFilm(1, "newFilm", "Description", LocalDate.of(2020, 10, 10), 300);
         filmController.put(1, newFilm);
 
-        assertEquals(filmController.getFilms().get(1).getName(), "newFilm");
+        assertEquals(filmController.find(1).getName(), "newFilm");
     }
 
     @Test
@@ -68,7 +68,7 @@ public class controllerTest {
         User newUser = getNewUser(1, "user@test", "newUser", "Username", LocalDate.of(2000, 10, 10));
         userController.put(1, newUser);
 
-        assertEquals(userController.getUsers().get(1).getLogin(), "newUser");
+        assertEquals(userController.find(1).getLogin(), "newUser");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class controllerTest {
         filmController.create(film);
         filmController.delete(1);
 
-        assertEquals(filmController.getFilms().size(), 0);
+        assertEquals(filmController.findAll().size(), 0);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class controllerTest {
         userController.create(user);
         userController.delete(1);
 
-        assertEquals(userController.getUsers().size(), 0);
+        assertEquals(userController.findAll().size(), 0);
     }
 
     private Film getNewFilm(int id, String name, String description, LocalDate releaseDate, int duration) {

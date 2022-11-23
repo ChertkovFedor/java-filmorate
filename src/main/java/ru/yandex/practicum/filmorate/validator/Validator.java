@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.validator;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -7,6 +9,7 @@ import java.time.LocalDate;
 
 public class Validator {
 
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public static void filmValid(Film film) {
         if (film == null)
             throw new ValidationException("request body is missing");
@@ -20,6 +23,7 @@ public class Validator {
             throw new ValidationException("the duration of the film should be positive");
     }
 
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public static void userValid(User user) {
         if (user == null)
             throw new ValidationException("request body is missing");
@@ -31,6 +35,11 @@ public class Validator {
             user.setName(user.getLogin());
         if (user.getBirthday().isAfter(LocalDate.now()))
             throw new ValidationException("the date of birth cannot be in the future");
+    }
+
+    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    public static void notFoundId() {
+        throw new ValidationException("there is no object with this id");
     }
 
 }

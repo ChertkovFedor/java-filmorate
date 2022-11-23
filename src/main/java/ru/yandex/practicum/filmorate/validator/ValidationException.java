@@ -9,4 +9,5 @@ public class ValidationException extends RuntimeException {
         super(m);
         log.info("Validation failed: " + m);
     }
+
 }
