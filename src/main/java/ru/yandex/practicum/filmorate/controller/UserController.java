@@ -7,26 +7,26 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
 public class UserController {
 
-    private List<User> users = new ArrayList<>();
+    private final Map<Integer, User> users = new HashMap<>();
     int newId = 1;
 
     @GetMapping("/users")
     public List<User> findAll() {
-        return users;
+        return new ArrayList<>(users.values());
     }
 
     @GetMapping(value = "/users/{id}")
     public User find(@PathVariable("id") int id) {
-        for (User user:users) {
-            if (user.getId() == id) {
-                return user;
-            }
+        if (users.containsKey(id)) {
+            return users.get(id);
         }
         Validator.notFoundId();
         return null;
@@ -53,36 +53,32 @@ public class UserController {
 
     @DeleteMapping(value = "/users/{id}")
     public void delete(@PathVariable("id") int id) {
-        for (User user:users) {
-            if (user.getId() == id) {
-                users.remove(user);
-                log.info("Пользователь удален");
+            if (users.containsKey(id)) {
+                users.remove(id);
+                log.info("Пользователь id="+id+" удален");
                 return;
             }
-        }
         Validator.notFoundId();
     }
 
     public void addUser(User user) {
         Validator.userValid(user);
-        if (user.getId() == 0) {
+        if (user.getId() == null) {
             user.setId(newId++);
         } else if (newId <= user.getId()) {
             newId = user.getId() + 1;
         }
-        users.add(user);
-        log.info("Пользователь добавлен");
+        users.put(user.getId(), user);
+        log.info("Пользователь id="+user.getId()+" добавлен");
     }
 
     public void updateUser(int id, User user) {
         Validator.userValid(user);
-        for (User oldUser:users) {
-            if (oldUser.getId() == id) {
-                oldUser.setUser(user);
-                log.info("Пользователь обновлен");
+            if (users.containsKey(id)) {
+                users.get(id).setUser(user);
+                log.info("Пользователь id="+user.getId()+" обновлен");
                 return;
             }
-        }
         Validator.notFoundId();
     }
 

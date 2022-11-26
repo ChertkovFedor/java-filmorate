@@ -7,26 +7,26 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
 public class FilmController {
 
-    private List<Film> films = new ArrayList<>();
-    int newId = 1;
+    private final Map<Integer, Film> films = new HashMap<>();
+    Integer newId = 1;
 
     @GetMapping(value = "/films")
     public List<Film> findAll() {
-        return films;
+        return new ArrayList<>(films.values());
     }
 
     @GetMapping(value = "/films/{id}")
     public Film find(@PathVariable("id") int id) {
-        for (Film film:films) {
-            if (film.getId() == id) {
-                return film;
-            }
+        if (films.containsKey(id)) {
+            return films.get(id);
         }
         Validator.notFoundId();
         return null;
@@ -53,35 +53,31 @@ public class FilmController {
 
     @DeleteMapping(value = "/films/{id}")
     public void delete(@PathVariable("id") int id) {
-        for (Film film:films) {
-            if (film.getId() == id) {
-                films.remove(film);
-                log.info("Фильм удален");
-                return;
-            }
+        if (films.containsKey(id)) {
+            films.remove(id);
+            log.info("Фильм id="+id+" удален");
+            return;
         }
         Validator.notFoundId();
     }
 
     public void addFilm(Film film) {
         Validator.filmValid(film);
-        if (film.getId() == 0) {
+        if (film.getId() == null) {
             film.setId(newId++);
         } else if (newId <= film.getId()) {
             newId = film.getId() + 1;
         }
-        films.add(film);
-        log.info("Фильм добавлен");
+        films.put(film.getId(), film);
+        log.info("Фильм id="+film.getId()+" добавлен");
     }
 
     public void updateFilm(int id, Film film) {
         Validator.filmValid(film);
-        for (Film oldFilm:films) {
-            if (oldFilm.getId() == id) {
-                oldFilm.setFilm(film);
-                log.info("Фильм обновлен");
-                return;
-            }
+        if (films.containsKey(id)) {
+            films.get(id).setFilm(film);
+            log.info("Фильм id="+film.getId()+" обновлен");
+            return;
         }
         Validator.notFoundId();
     }

@@ -12,10 +12,10 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class controllerTest {
+public class ControllerTest {
 
-    FilmController filmController;
-    UserController userController;
+    private FilmController filmController;
+    private UserController userController;
 
     @BeforeEach
     public void newControllers() {
