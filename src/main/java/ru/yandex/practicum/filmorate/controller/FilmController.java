@@ -15,8 +15,8 @@ import java.util.Map;
 @RestController
 public class FilmController {
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    Integer newId = 1;
+    protected final Map<Integer, Film> films = new HashMap<>();
+    private int newId = 1;
 
     @GetMapping(value = "/films")
     public List<Film> findAll() {

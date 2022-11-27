@@ -16,7 +16,7 @@ import java.util.Map;
 public class UserController {
 
     private final Map<Integer, User> users = new HashMap<>();
-    int newId = 1;
+    private int newId = 1;
 
     @GetMapping("/users")
     public List<User> findAll() {
