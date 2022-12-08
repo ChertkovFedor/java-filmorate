@@ -13,48 +13,46 @@ import java.util.Set;
 @RestController
 public class UserController {
 
-    private final InMemoryUserStorage inMemoryUserStorage;
 
     private final UserService userService;
 
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("/users")
     public List<User> findAll() {
-        return inMemoryUserStorage.findAll();
+        return userService.getUserStorage().findAll();
     }
 
     @GetMapping(value = "/users/{id}")
     public User find(@PathVariable("id") Long id) {
-        return inMemoryUserStorage.find(id);
+        return userService.getUserStorage().find(id);
     }
 
     @PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     public User create(@RequestBody User user) {
-        return inMemoryUserStorage.create(user);
+        return userService.getUserStorage().create(user);
     }
 
     @PutMapping(value = "/users/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public User put(@PathVariable("id") Long id, @RequestBody User user) {
-        return inMemoryUserStorage.put(id, user);
+        return userService.getUserStorage().put(id, user);
     }
 
     @PutMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     public User putIdInBody(@RequestBody User user) {
-        return inMemoryUserStorage.putIdInBody(user);
+        return userService.getUserStorage().putIdInBody(user);
     }
 
     @DeleteMapping(value = "/users/{id}")
     public void delete(@PathVariable("id") Long id) {
-        inMemoryUserStorage.delete(id);
+        userService.getUserStorage().delete(id);
     }
 
     @DeleteMapping(value = "/users/all")
     public void clear() {
-        inMemoryUserStorage.clear();
+        userService.getUserStorage().clear();
     }
 
     @GetMapping(value = "/users/{id}/friends")

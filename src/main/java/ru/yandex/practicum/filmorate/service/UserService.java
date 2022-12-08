@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Logger;
@@ -9,10 +10,12 @@ import ru.yandex.practicum.filmorate.validator.FilmValidator;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Service
+@Getter
 public class UserService {
 
     private final UserStorage userStorage;
@@ -62,10 +65,12 @@ public class UserService {
         User firstUser = userStorage.find(idFirstUser);
         User secondUser = userStorage.find(idSecondUser);
 
+        Set<Long> mutualFriendsId = new HashSet<>(firstUser.getFriends());
+        mutualFriendsId.retainAll(secondUser.getFriends());
+
         List<User> mutualFriends = new ArrayList<>();
-        for (Long idFriendFirstUser : firstUser.getFriends()) {
-            if (secondUser.getFriends().contains(idFriendFirstUser))
-                mutualFriends.add(userStorage.find(idFriendFirstUser));
+        for (Long mutualFriendId : mutualFriendsId) {
+            mutualFriends.add(userStorage.find(mutualFriendId));
         }
         return mutualFriends;
     }
