@@ -10,11 +10,14 @@ import java.util.stream.Stream;
 @Data
 public class Film {
     private Long id;
-    private String  name;
+    private String name;
     private String description;
     private LocalDate releaseDate;
     private int duration;
     private Set<Long> likes = new HashSet<>();
+    private String genre;
+    private String mpa;
+
 
     public void setFilm(Film film) {
         this.setId(film.getId());
@@ -22,5 +25,7 @@ public class Film {
         this.setDescription(film.getDescription());
         this.setReleaseDate(film.getReleaseDate());
         this.setDuration(film.getDuration());
+        this.setGenre(film.getGenre());
+        this.setMpa(film.getMpa());
     }
 }
