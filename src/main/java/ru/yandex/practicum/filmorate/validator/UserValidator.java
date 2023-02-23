@@ -1,12 +1,9 @@
 package ru.yandex.practicum.filmorate.validator;
 
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 public class UserValidator {
 
@@ -26,16 +23,6 @@ public class UserValidator {
     public static void recurringUser(Long firstId, Long secondId) {
         if (firstId.equals(secondId))
             throw new ValidationException("an operation is performed with the same user");
-    }
-
-    public static void alreadyExistIdUser(Long id, Map<Long, User> users) {
-        if (users.containsKey(id))
-            throw new AlreadyExistException("user with this id already exists");
-    }
-
-    public static void notFoundIdUser(Long id, Map<Long, User> users) {
-        if (!users.containsKey(id))
-            throw new UserNotFoundException("there is no user with this id");
     }
 
 }

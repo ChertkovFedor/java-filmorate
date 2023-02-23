@@ -4,13 +4,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
 
@@ -20,57 +18,57 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> findAll() {
-        return userService.getUserStorage().findAll();
+        return userService.findAll();
     }
 
-    @GetMapping(value = "/users/{id}")
+    @GetMapping(value = "/{id}")
     public User find(@PathVariable("id") Long id) {
-        return userService.getUserStorage().find(id);
+        return userService.find(id);
     }
 
-    @PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public User create(@RequestBody User user) {
-        return userService.getUserStorage().create(user);
+        return userService.create(user);
     }
 
-    @PutMapping(value = "/users/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public User put(@PathVariable("id") Long id, @RequestBody User user) {
-        return userService.getUserStorage().put(id, user);
+        return userService.put(id, user);
     }
 
-    @PutMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public User putIdInBody(@RequestBody User user) {
-        return userService.getUserStorage().putIdInBody(user);
+        return userService.putIdInBody(user);
     }
 
-    @DeleteMapping(value = "/users/{id}")
+    @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("id") Long id) {
-        userService.getUserStorage().delete(id);
+        userService.delete(id);
     }
 
-    @DeleteMapping(value = "/users/all")
+    @DeleteMapping(value = "/all")
     public void clear() {
-        userService.getUserStorage().clear();
+        userService.clear();
     }
 
-    @GetMapping(value = "/users/{id}/friends")
+    @GetMapping(value = "/{id}/friends")
     public List<User> getFriends(@PathVariable("id") Long id) {
         return userService.getFriends(id);
     }
 
-    @PutMapping(value = "/users/{id}/friends/{friendId}")
+    @PutMapping(value = "/{id}/friends/{friendId}")
     public void addLike(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
+    @GetMapping(value = "/{id}/friends/common/{otherId}")
     public List<User> getMutualFriends(@PathVariable("id") Long id, @PathVariable("otherId") Long otherId) {
         return userService.getMutualFriends(id, otherId);
     }

@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 @Data
 public class Film {
@@ -14,18 +11,18 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private Set<Long> likes = new HashSet<>();
-    private String genre;
-    private String mpa;
+    private long rate;
+    private List<Genre> genres;
+    private Mpa mpa;
 
-
-    public void setFilm(Film film) {
-        this.setId(film.getId());
-        this.setName(film.getName());
-        this.setDescription(film.getDescription());
-        this.setReleaseDate(film.getReleaseDate());
-        this.setDuration(film.getDuration());
-        this.setGenre(film.getGenre());
-        this.setMpa(film.getMpa());
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, long rate, List<Genre> genres, Mpa mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.rate = rate;
+        this.genres = genres;
+        this.mpa = mpa;
     }
 }
