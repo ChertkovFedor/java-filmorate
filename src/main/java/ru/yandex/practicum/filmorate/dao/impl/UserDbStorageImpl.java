@@ -25,11 +25,9 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public User find(Long id) {
-        String sql = """
-                SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY
-                FROM USERS
-                WHERE USER_ID = ?
-                """;
+        String sql = "SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY " +
+                "FROM USERS " +
+                "WHERE USER_ID = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         if (userRows.next()) {
             return makeUserSqlRowSet(userRows);
@@ -42,18 +40,14 @@ public class UserDbStorageImpl implements UserDbStorage {
     public User create(User user) {
         Long id;
         if (user.getId() == null) {
-            String sql = """
-                    INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY)
-                    VALUES (?, ?, ?, ?)
-                    """;
+            String sql = "INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY) " +
+                    "VALUES (?, ?, ?, ?)";
             jdbcTemplate.update(sql, user.getEmail(), user.getLogin(),
                     user.getName(), user.getBirthday());
             id = jdbcTemplate.queryForObject("SELECT MAX(USER_ID) FROM USERS", Long.class);
         } else {
-            String sql = """
-                    INSERT INTO USERS (USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY)
-                    VALUES (?, ?, ?, ?, ?)
-                    """;
+            String sql = "INSERT INTO USERS (USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY) " +
+                    "VALUES (?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, user.getId(), user.getEmail(), user.getLogin(),
                     user.getName(), user.getBirthday());
             id = user.getId();
@@ -67,10 +61,8 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public User update(Long id, User user) {
-        String sql = """
-                UPDATE USERS SET EMAIL = ?, LOGIN = ?, USER_NAME = ?, BIRTHDAY = ?
-                WHERE USER_ID = ?
-                """;
+        String sql = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, USER_NAME = ?, BIRTHDAY = ? " +
+                "WHERE USER_ID = ?";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(),
                 user.getName(), user.getBirthday(), id);
 
@@ -89,20 +81,16 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public void clear() {
-        String sql = """
-        DELETE FROM USERS;
-        ALTER TABLE USERS DROP COLUMN USER_ID;
-        ALTER TABLE USERS ADD COLUMN USER_ID INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
-        """;
+        String sql = "DELETE FROM USERS; " +
+        "ALTER TABLE USERS DROP COLUMN USER_ID; " +
+        "ALTER TABLE USERS ADD COLUMN USER_ID INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST";
         jdbcTemplate.update(sql);
     }
 
     @Override
     public List<User> getUsers() {
-        String sql = """
-                SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY
-                FROM USERS
-                """;
+        String sql = "SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY " +
+                "FROM USERS";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUserResultSet(rs));
     }
 
@@ -112,10 +100,8 @@ public class UserDbStorageImpl implements UserDbStorage {
         if (!friendRows.next()) {
             SqlRowSet friendRequestRows = jdbcTemplate.queryForRowSet("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ? LIMIT 1", idFriend, id);
             if (!friendRequestRows.next()) {
-                jdbcTemplate.update("""
-                        INSERT INTO FRIENDS (USER_ID, FRIEND_ID, STATUS)
-                        VALUES (?, ?, ?)
-                        """, id, idFriend, false);
+                jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, STATUS) " +
+                        "VALUES (?, ?, ?)", id, idFriend, false);
                 Logger.queryResultLog("friend id=" + idFriend + " added to user id=" + id);
             } else {
                 boolean status = friendRequestRows.getBoolean("STATUS");
@@ -145,47 +131,43 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public List<User> getFriends(Long id) {
-        String sql = """
-                SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.USER_NAME, u.BIRTHDAY
-                FROM FRIENDS AS f
-                JOIN USERS AS u ON f.FRIEND_ID = u.USER_ID
-                WHERE f.USER_ID = ?
-                UNION
-                SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.USER_NAME, u.BIRTHDAY
-                FROM FRIENDS AS f
-                JOIN USERS AS u ON f.USER_ID = u.USER_ID
-                WHERE f.FRIEND_ID = ? AND f.STATUS = true
-                """;
+        String sql = "SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.USER_NAME, u.BIRTHDAY " +
+                "FROM FRIENDS AS f " +
+                "JOIN USERS AS u ON f.FRIEND_ID = u.USER_ID " +
+                "WHERE f.USER_ID = ? " +
+                "UNION " +
+                "SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.USER_NAME, u.BIRTHDAY " +
+                "FROM FRIENDS AS f " +
+                "JOIN USERS AS u ON f.USER_ID = u.USER_ID " +
+                "WHERE f.FRIEND_ID = ? AND f.STATUS = true";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUserResultSet(rs), id, id);
     }
 
     @Override
     public List<User> getMutualFriends(Long idFirstUser, Long idSecondUser) {
-        String sql = """
-                SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY
-                FROM USERS
-                WHERE USER_ID IN (SELECT USER_ID
-                                  FROM FRIENDS
-                                  WHERE USER_ID IN (SELECT FRIEND_ID
-                                                    FROM FRIENDS
-                                                    WHERE (USER_ID = ?) AND FRIEND_ID != ?
-                                                    UNION
-                                                    SELECT USER_ID
-                                                    FROM FRIENDS
-                                                    WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?)
-                                  AND STATUS = true AND FRIEND_ID = ?
-                                  UNION
-                                  SELECT FRIEND_ID
-                                  FROM FRIENDS
-                                  WHERE FRIEND_ID IN (SELECT FRIEND_ID
-                                                      FROM FRIENDS
-                                                      WHERE (USER_ID = ?) AND FRIEND_ID != ?
-                                                      UNION
-                                                      SELECT USER_ID
-                                                      FROM FRIENDS
-                                                      WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?)
-                                  AND USER_ID = ?)
-                """;
+        String sql = "SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY " +
+                "FROM USERS " +
+                "WHERE USER_ID IN (SELECT USER_ID " +
+                                  "FROM FRIENDS " +
+                                  "WHERE USER_ID IN (SELECT FRIEND_ID " +
+                                                    "FROM FRIENDS " +
+                                                    "WHERE (USER_ID = ?) AND FRIEND_ID != ? " +
+                                                    "UNION " +
+                                                    "SELECT USER_ID " +
+                                                    "FROM FRIENDS " +
+                                                    "WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?) " +
+                                  "AND STATUS = true AND FRIEND_ID = ? " +
+                                  "UNION " +
+                                  "SELECT FRIEND_ID " +
+                                  "FROM FRIENDS " +
+                                  "WHERE FRIEND_ID IN (SELECT FRIEND_ID " +
+                                                      "FROM FRIENDS " +
+                                                      "WHERE (USER_ID = ?) AND FRIEND_ID != ? " +
+                                                      "UNION " +
+                                                      "SELECT USER_ID " +
+                                                      "FROM FRIENDS " +
+                                                      "WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?) " +
+                                  "AND USER_ID = ?)";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUserResultSet(rs), idFirstUser, idSecondUser, idFirstUser, idSecondUser, idSecondUser, idFirstUser, idSecondUser, idFirstUser, idSecondUser, idSecondUser);
     }
 

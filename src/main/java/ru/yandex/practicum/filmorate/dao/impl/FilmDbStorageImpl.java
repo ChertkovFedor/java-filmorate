@@ -33,12 +33,10 @@ public class FilmDbStorageImpl implements FilmDbStorage {
 
     @Override
     public Film find(Long id) {
-        String sql = """
-                SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID
-                FROM FILMS AS f
-                JOIN MPA AS m ON f.MPA_ID = m.MPA_ID
-                WHERE f.FILM_ID = ?
-                """;
+        String sql = "SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID " +
+                "FROM FILMS AS f " +
+                "JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
+                "WHERE f.FILM_ID = ?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, id);
         if (filmRows.next()) {
             return makeFilmSqlRowSet(filmRows);
@@ -57,11 +55,9 @@ public class FilmDbStorageImpl implements FilmDbStorage {
 
     @Override
     public void clear() {
-        String sql = """
-        DELETE FROM FILMS;
-        ALTER TABLE FILMS DROP COLUMN FILM_ID;
-        ALTER TABLE FILMS ADD COLUMN FILM_ID INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
-        """;
+        String sql = "DELETE FROM FILMS; " +
+        "ALTER TABLE FILMS DROP COLUMN FILM_ID; " +
+        "ALTER TABLE FILMS ADD COLUMN FILM_ID INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST; ";
 
         jdbcTemplate.update(sql);
     }
@@ -71,18 +67,14 @@ public class FilmDbStorageImpl implements FilmDbStorage {
         Long mpaId = film.getMpa().getId();
         Long id;
         if (film.getId() == null) {
-            String sql = """
-                    INSERT INTO FILMS (FILM_NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE, MPA_ID)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """;
+            String sql = "INSERT INTO FILMS (FILM_NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE, MPA_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getRate(), mpaId);
             id = jdbcTemplate.queryForObject("SELECT MAX(FILM_ID) FROM FILMS", Long.class);
         } else {
-            String sql = """
-                    INSERT INTO FILMS (FILM_ID, FILM_NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE, MPA_ID)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """;
+            String sql = "INSERT INTO FILMS (FILM_ID, FILM_NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE, MPA_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, film.getId(), film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getRate(), mpaId);
             id = film.getId();
@@ -115,10 +107,8 @@ public class FilmDbStorageImpl implements FilmDbStorage {
     public void addLike(Long filmId, Long userId) {
         SqlRowSet likeRows = jdbcTemplate.queryForRowSet("SELECT * FROM LIKES WHERE FILM_ID = ? AND USER_ID = ? LIMIT 1", filmId, userId);
         if (!likeRows.next()) {
-            String sql = """
-                    INSERT INTO LIKES (FILM_ID, USER_ID) VALUES (?, ?);
-                    UPDATE FILMS SET RATE = RATE + 1 WHERE FILM_ID = ?
-                    """;
+            String sql = "INSERT INTO LIKES (FILM_ID, USER_ID) VALUES (?, ?); " +
+                    "UPDATE FILMS SET RATE = RATE + 1 WHERE FILM_ID = ?";
             jdbcTemplate.update(sql, filmId, userId, filmId);
 
 
@@ -130,10 +120,8 @@ public class FilmDbStorageImpl implements FilmDbStorage {
     public void deleteLike(Long filmId, Long userId) {
         SqlRowSet likeRows = jdbcTemplate.queryForRowSet("SELECT * FROM LIKES WHERE FILM_ID = ? AND USER_ID = ? LIMIT 1", filmId, userId);
         if (likeRows.next()) {
-            String sql = """
-                    DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?;
-                    UPDATE FILMS SET RATE = RATE - 1 WHERE FILM_ID = ?
-                    """;
+            String sql = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?; " +
+                    "UPDATE FILMS SET RATE = RATE - 1 WHERE FILM_ID = ?";
             jdbcTemplate.update(sql, filmId, userId, filmId);
 
             Logger.queryResultLog("like from the film filmId=" + filmId + " deleted");
@@ -143,22 +131,19 @@ public class FilmDbStorageImpl implements FilmDbStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        String sql = """
-                SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID
-                FROM FILMS AS f
-                JOIN MPA AS m ON f.MPA_ID = m.MPA_ID
-                ORDER BY f.RATE DESC
-                LIMIT ?""";
+        String sql = "SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID " +
+                "FROM FILMS AS f " +
+                "JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
+                "ORDER BY f.RATE DESC " +
+                "LIMIT ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmResultSet(rs), count);
     }
 
     @Override
     public List<Film> getFilms() {
-        String sql = """
-                SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID
-                FROM FILMS AS f
-                JOIN MPA AS m ON f.MPA_ID = m.MPA_ID
-                """;
+        String sql = "SELECT f.FILM_ID, f.FILM_NAME, f.DESCRIPTION, f.RELEASEDATE, f.DURATION, f.RATE, m.MPA_ID " +
+                "FROM FILMS AS f " +
+                "JOIN MPA AS m ON f.MPA_ID = m.MPA_ID";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmResultSet(rs));
     }
 

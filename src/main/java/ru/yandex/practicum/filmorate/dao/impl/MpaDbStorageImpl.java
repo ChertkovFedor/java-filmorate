@@ -23,11 +23,7 @@ public class MpaDbStorageImpl implements MpaDbStorage {
     @Override
     public Mpa find(Long id) {
         checkNotFoundIdMpa(id);
-        String sql = """
-                SELECT *
-                FROM MPA
-                WHERE MPA_ID = ?
-                """;
+        String sql = "SELECT * FROM MPA WHERE MPA_ID = ?";
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sql, id);
         if (mpaRows.next()) {
             return makeMpaSqlRowSet(mpaRows);
@@ -38,10 +34,7 @@ public class MpaDbStorageImpl implements MpaDbStorage {
 
     @Override
     public List<Mpa> getAllMpa() {
-        String sql = """
-                SELECT *
-                FROM MPA
-                """;
+        String sql = "SELECT * FROM MPA";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpaResultSet(rs));
     }
 

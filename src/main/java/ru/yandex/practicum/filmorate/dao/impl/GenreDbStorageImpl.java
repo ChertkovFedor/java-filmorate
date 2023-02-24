@@ -25,11 +25,7 @@ public class GenreDbStorageImpl implements GenreDbStorage {
     @Override
     public Genre find(Long id) {
         checkNotFoundIdGenre(id);
-        String sql = """
-                SELECT *
-                FROM GENRES
-                WHERE GENRE_ID = ?
-                """;
+        String sql = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql, id);
         if (genreRows.next()) {
             return makeGenreSqlRowSet(genreRows);
@@ -40,10 +36,7 @@ public class GenreDbStorageImpl implements GenreDbStorage {
 
     @Override
     public List<Genre> getGenres() {
-        String sql = """
-                SELECT *
-                FROM GENRES
-                """;
+        String sql = "SELECT * FROM GENRES";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenreResultSet(rs));
     }
 
@@ -65,12 +58,10 @@ public class GenreDbStorageImpl implements GenreDbStorage {
 
     @Override
     public List<Genre> getGenresByFilmId(Long filmId) {
-        String sql = """
-                SELECT g.GENRE_ID, g.GENRE_NAME
-                FROM FILM_GENRES AS fg
-                JOIN GENRES AS g ON fg.GENRE_ID = g.GENRE_ID
-                WHERE fg.FILM_ID = ?
-                """;
+        String sql = "SELECT g.GENRE_ID, g.GENRE_NAME " +
+                "FROM FILM_GENRES AS fg " +
+                "JOIN GENRES AS g ON fg.GENRE_ID = g.GENRE_ID " +
+                "WHERE fg.FILM_ID = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenreResultSet(rs), filmId);
     }
 
