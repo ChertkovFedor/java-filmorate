@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.Logger;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -75,8 +76,12 @@ public class UserDbStorageImpl implements UserDbStorage {
     public void delete(Long id) {
         String sql = "DELETE FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(sql, id);
-
-        Logger.queryResultLog("user id=" + id + " deleted");
+        User user = find(id);
+        if (user == null) {
+            Logger.queryResultLog("User id=" + id + " deleted");
+        } else {
+            Logger.queryResultLog("Error. The user id=" + id + " was not deleted");
+        }
     }
 
     @Override
@@ -119,13 +124,17 @@ public class UserDbStorageImpl implements UserDbStorage {
         SqlRowSet friendRows = jdbcTemplate.queryForRowSet("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ? LIMIT 1", id, idFriend);
         if (friendRows.next()) {
             jdbcTemplate.update("DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?", id, idFriend);
-            Logger.queryResultLog("friend id=" + idFriend + " deleted from the user id=" + id);
         } else {
             SqlRowSet friendRequestRows = jdbcTemplate.queryForRowSet("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ? LIMIT 1", idFriend, id);
             if (friendRequestRows.next()) {
                 jdbcTemplate.update("DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?", idFriend, id);
-                Logger.queryResultLog("friend id=" + idFriend + " deleted from the user id=" + id);
             }
+        }
+        friendRows = jdbcTemplate.queryForRowSet("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ? LIMIT 1", id, idFriend);
+        if (friendRows.next()) {
+            Logger.queryResultLog("friend id=" + idFriend + " no deleted from the user id=" + id);
+        } else {
+            Logger.queryResultLog("friend id=" + idFriend + " deleted from the user id=" + id);
         }
     }
 
@@ -145,29 +154,29 @@ public class UserDbStorageImpl implements UserDbStorage {
 
     @Override
     public List<User> getMutualFriends(Long idFirstUser, Long idSecondUser) {
-        String sql = "SELECT USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY " +
-                "FROM USERS " +
-                "WHERE USER_ID IN (SELECT USER_ID " +
-                                  "FROM FRIENDS " +
-                                  "WHERE USER_ID IN (SELECT FRIEND_ID " +
-                                                    "FROM FRIENDS " +
-                                                    "WHERE (USER_ID = ?) AND FRIEND_ID != ? " +
+        String sql = "SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.USER_NAME, u.BIRTHDAY " +
+                "FROM USERS AS u " +
+                "WHERE u.USER_ID IN (SELECT f1.USER_ID " +
+                                  "FROM FRIENDS AS f1 " +
+                                  "WHERE f1.USER_ID IN (SELECT f3.FRIEND_ID " +
+                                                    "FROM FRIENDS AS f3 " +
+                                                    "WHERE (f3.USER_ID = ?) AND f3.FRIEND_ID != ? " +
                                                     "UNION " +
-                                                    "SELECT USER_ID " +
-                                                    "FROM FRIENDS " +
-                                                    "WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?) " +
-                                  "AND STATUS = true AND FRIEND_ID = ? " +
+                                                    "SELECT f4.USER_ID " +
+                                                    "FROM FRIENDS AS f4 " +
+                                                    "WHERE (f4.FRIEND_ID = ? AND f4.STATUS = true) AND f4.USER_ID != ?) " +
+                                  "AND f1.STATUS = true AND f1.FRIEND_ID = ? " +
                                   "UNION " +
-                                  "SELECT FRIEND_ID " +
-                                  "FROM FRIENDS " +
-                                  "WHERE FRIEND_ID IN (SELECT FRIEND_ID " +
-                                                      "FROM FRIENDS " +
-                                                      "WHERE (USER_ID = ?) AND FRIEND_ID != ? " +
+                                  "SELECT f2.FRIEND_ID " +
+                                  "FROM FRIENDS AS f2 " +
+                                  "WHERE f2.FRIEND_ID IN (SELECT f5.FRIEND_ID " +
+                                                      "FROM FRIENDS AS f5 " +
+                                                      "WHERE (f5.USER_ID = ?) AND f5.FRIEND_ID != ? " +
                                                       "UNION " +
-                                                      "SELECT USER_ID " +
-                                                      "FROM FRIENDS " +
-                                                      "WHERE (FRIEND_ID = ? AND STATUS = true) AND USER_ID != ?) " +
-                                  "AND USER_ID = ?)";
+                                                      "SELECT f6.USER_ID " +
+                                                      "FROM FRIENDS AS f6 " +
+                                                      "WHERE (f6.FRIEND_ID = ? AND f6.STATUS = true) AND f6.USER_ID != ?) " +
+                                  "AND f2.USER_ID = ?)";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUserResultSet(rs), idFirstUser, idSecondUser, idFirstUser, idSecondUser, idSecondUser, idFirstUser, idSecondUser, idFirstUser, idSecondUser, idSecondUser);
     }
 

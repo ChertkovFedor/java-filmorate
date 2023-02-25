@@ -49,8 +49,12 @@ public class FilmDbStorageImpl implements FilmDbStorage {
     public void delete(Long id) {
         String sql = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(sql, id);
-
-        Logger.queryResultLog("film id=" + id + " deleted");
+        Film film = find(id);
+        if (film == null) {
+            Logger.queryResultLog("film id=" + id + " deleted");
+        } else {
+            Logger.queryResultLog("Error. The film id=" + id + " was not deleted");
+        }
     }
 
     @Override
@@ -58,8 +62,6 @@ public class FilmDbStorageImpl implements FilmDbStorage {
         String sql = "DELETE FROM FILMS; " +
         "ALTER TABLE FILMS DROP COLUMN FILM_ID; " +
         "ALTER TABLE FILMS ADD COLUMN FILM_ID INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST; ";
-
-        jdbcTemplate.update(sql);
     }
 
     @Override
@@ -110,9 +112,12 @@ public class FilmDbStorageImpl implements FilmDbStorage {
             String sql = "INSERT INTO LIKES (FILM_ID, USER_ID) VALUES (?, ?); " +
                     "UPDATE FILMS SET RATE = RATE + 1 WHERE FILM_ID = ?";
             jdbcTemplate.update(sql, filmId, userId, filmId);
-
-
-            Logger.queryResultLog("like to the film filmId=" + filmId + " added");
+            likeRows = jdbcTemplate.queryForRowSet("SELECT * FROM LIKES WHERE FILM_ID = ? AND USER_ID = ? LIMIT 1", filmId, userId);
+            if (likeRows.next()) {
+                Logger.queryResultLog("like to the film filmId=" + filmId + " added");
+            } else {
+                Logger.queryResultLog("like to the film filmId=" + filmId + " no added");
+            }
         }
     }
 
@@ -123,8 +128,12 @@ public class FilmDbStorageImpl implements FilmDbStorage {
             String sql = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?; " +
                     "UPDATE FILMS SET RATE = RATE - 1 WHERE FILM_ID = ?";
             jdbcTemplate.update(sql, filmId, userId, filmId);
-
-            Logger.queryResultLog("like from the film filmId=" + filmId + " deleted");
+            likeRows = jdbcTemplate.queryForRowSet("SELECT * FROM LIKES WHERE FILM_ID = ? AND USER_ID = ? LIMIT 1", filmId, userId);
+            if (likeRows.next()) {
+                Logger.queryResultLog("The like from the film filmId=" + filmId + " was not deleted");
+            } else {
+                Logger.queryResultLog("like from the film filmId=" + filmId + " deleted");
+            }
         }
 
     }
