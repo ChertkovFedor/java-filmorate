@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class Film {
     private Long id;
     private String name;
@@ -14,15 +16,4 @@ public class Film {
     private long rate;
     private List<Genre> genres;
     private Mpa mpa;
-
-    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, long rate, List<Genre> genres, Mpa mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.rate = rate;
-        this.genres = genres;
-        this.mpa = mpa;
-    }
 }

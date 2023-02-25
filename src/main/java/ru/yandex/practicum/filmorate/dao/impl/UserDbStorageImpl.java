@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -16,13 +17,10 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Component
+@AllArgsConstructor
 public class UserDbStorageImpl implements UserDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorageImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public User find(Long id) {

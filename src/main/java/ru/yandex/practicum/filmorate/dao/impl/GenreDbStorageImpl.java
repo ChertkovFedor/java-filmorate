@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -14,13 +15,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class GenreDbStorageImpl implements GenreDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public GenreDbStorageImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Genre find(Long id) {
