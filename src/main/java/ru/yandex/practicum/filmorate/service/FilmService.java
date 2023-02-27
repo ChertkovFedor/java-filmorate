@@ -1,79 +1,88 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.Constants;
-import ru.yandex.practicum.filmorate.Logger;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Getter
 public class FilmService {
 
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmDbStorage filmDbStorage;
+    private final UserDbStorage userDbStorage;
+    private final MpaDbStorage mpaDbStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, MpaDbStorage mpaDbStorage) {
+        this.filmDbStorage = filmDbStorage;
+        this.userDbStorage = userDbStorage;
+        this.mpaDbStorage = mpaDbStorage;
+    }
+
+    public List<Film> findAll() {
+        return filmDbStorage.getFilms();
+    }
+
+    public Film find(Long id) {
+        filmDbStorage.checkNotFoundIdFilm(id);
+        return filmDbStorage.find(id);
+    }
+
+    public void delete(Long id) {
+        filmDbStorage.checkNotFoundIdFilm(id);
+        filmDbStorage.delete(id);
+    }
+
+    public void clear() {
+        filmDbStorage.clear();
+    }
+
+    public Film create(Film film) {
+        FilmValidator.filmValid(film);
+        filmDbStorage.checkAlreadyExistIdFilm(film.getId());
+        //mpaDbStorage.checkNotFoundIdMpa(film.getMpa().getId());
+        return filmDbStorage.create(film);
+    }
+
+    public Film put(Long id, Film film) {
+        FilmValidator.filmValid(film);
+        filmDbStorage.checkNotFoundIdFilm(id);
+        //mpaDbStorage.checkNotFoundIdMpa(film.getMpa().getId());
+        return filmDbStorage.update(id, film);
+    }
+
+    public Film putIdInBody(Film film) {
+        FilmValidator.filmValid(film);
+        Long id = film.getId();
+        filmDbStorage.checkNotFoundIdFilm(id);
+        //mpaDbStorage.checkNotFoundIdMpa(film.getMpa().getId());
+        return filmDbStorage.update(id, film);
     }
 
     public void addLike(Long id, Long userId) {
         checkingInputValues(id, userId);
-
-        Film film = filmStorage.find(id);
-        film.getLikes().add(userId);
-
-        User user = userStorage.find(userId);
-        user.getLikeFilms().add(id);
-
-        Logger.queryResultLog("like to the film id=" + id + " added");
-
+        filmDbStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {
         checkingInputValues(id, userId);
-
-        Film film = filmStorage.find(id);
-        film.getLikes().remove(userId);
-
-        User user = userStorage.find(userId);
-        user.getLikeFilms().remove(id);
-
-        Logger.queryResultLog("like from the film id=" + id + " deleted");
+        filmDbStorage.deleteLike(id, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
         if (count == null)
             count = 10;
-        Collection<Film> filmsValues = filmStorage.getFilms().values();
-        return filmsValues.stream()
-                .sorted((p0, p1) -> compare(p0, p1, Constants.DESCENDING_ORDER))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmDbStorage.getPopularFilms(count);
     }
 
-    private int compare(Film p0, Film p1, String sort) {
-        int result = p0.getLikes().size() - p1.getLikes().size();
-        if (sort.equals(Constants.DESCENDING_ORDER)) {
-            result = -1 * result;
-        }
-        return result;
-    }
-
-    private void checkingInputValues(Long FilmId, Long userId) {
-        FilmValidator.notFoundIdFilm(FilmId, filmStorage.getFilms());
-        UserValidator.notFoundIdUser(userId, userStorage.getUsers());
+    private void checkingInputValues(Long filmId, Long userId) {
+        filmDbStorage.checkNotFoundIdFilm(filmId);
+        userDbStorage.checkNotFoundIdUser(userId);
     }
 
 }

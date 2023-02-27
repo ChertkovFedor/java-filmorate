@@ -1,12 +1,9 @@
 package ru.yandex.practicum.filmorate.validator;
 
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 public class FilmValidator {
 
@@ -21,16 +18,6 @@ public class FilmValidator {
             throw new ValidationException("release date - no earlier than December 28, 1895");
         if (film.getDuration() <= 0)
             throw new ValidationException("the duration of the film should be positive");
-    }
-
-    public static void alreadyExistIdFilm(Long id, Map<Long, Film> films) {
-        if (films.containsKey(id))
-            throw new AlreadyExistException("film with this id already exists");
-    }
-
-    public static void notFoundIdFilm(Long id, Map<Long, Film> films) {
-        if (!films.containsKey(id))
-            throw new FilmNotFoundException("there is no film with this id");
     }
 
 }
